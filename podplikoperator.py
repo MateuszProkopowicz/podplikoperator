@@ -1,5 +1,57 @@
 import argparse
 import sys
+import random
+import csv
+
+def prepare_data():
+    """Prepare model data and retrun dictionary containing is.
+
+    Returns:
+        dict[str, str | int]: resulting model data
+    """
+
+    data = {}
+    data['Model'] = random.choice(('A', 'B', 'C'))
+    data['Wynik'] = random.randint(0, 1000)
+    data['Czas'] = random.randint(0, 1000)
+    return data
+
+def csv_write(file_name, data):
+    """Write data from dictionary to file in csv format.
+
+    Args:
+        file_name (string): name of file in which to record data
+        data (dict): dictionary containing data in format {name : value}
+    """
+
+    with open(file_name, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, ['Model', 'Wynik', 'Czas'], delimiter=';', lineterminator=';\r\n')
+        writer.writeheader()
+        writer.writerow(data)
+
+def csv_read(file_name):
+    """Read data from csv file to a dictionary.
+
+    Args:
+        file_name (string): name of file containing data with following formatting:
+            name1;name2;name3;...;
+            value1;value2;value3;...;
+
+    Returns:
+        dict: dictionary containing data from file
+    """
+
+    with open(file_name, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=';')
+        data = next(reader)
+
+        # DictReader does not allow us to specify custom line delimiter. This
+        # leads to data containing an empty record being a result of semicolon
+        # ending lines in specified file formatting, which must be removed.
+        if '' in data.keys():
+            del data['']
+
+        return data
 
 def parse_arguments():
     months = ('jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec')
