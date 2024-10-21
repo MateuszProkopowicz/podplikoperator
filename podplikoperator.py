@@ -2,6 +2,7 @@ import argparse
 import sys
 import random
 import csv
+import json
 
 def prepare_data():
     """Prepare model data and retrun dictionary containing is.
@@ -51,6 +52,32 @@ def csv_read(file_name):
         if '' in data.keys():
             del data['']
 
+        return data
+
+def json_write(file_name, data):
+    """Write data from dictionary to file in json format.
+
+    Args:
+        file_name (string): name of file in which to record data
+        data (dict): dictionary containing data in format {name : value}
+    """
+
+    with open(file_name, 'w', newline='') as jsonfile:
+        json.dump(data, jsonfile)
+
+def json_read(file_name):
+    """Read data from json file to a dictionary.
+
+    Args:
+        file_name (string): name of file containing data with following formatting:
+            {name1 : value1; name2 : value2; name3 : value3; ...}
+
+    Returns:
+        dict: dictionary containing data from file
+    """
+
+    with open(file_name, 'r', newline='') as jsonfile:
+        data = json.load(jsonfile)
         return data
 
 def parse_arguments():
