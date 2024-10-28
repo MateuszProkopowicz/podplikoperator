@@ -142,7 +142,12 @@ def pathsConstructor(args):
     # Returns a list containing tuples in format (month, day, time) to help reaching needed paths
     days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
     timeCounter = 0
+    if args.time is None:
+        timeTab = []
+    else:
+        timeTab = args.time
     paths = []
+
     for i in range(len(args.months)):
         month = args.months[i]
 
@@ -155,8 +160,8 @@ def pathsConstructor(args):
             d_range = days[start:end + 1]
 
         for day in d_range:
-            if timeCounter < len(args.time):
-                time = args.time[timeCounter]
+            if timeCounter < len(timeTab):
+                time = timeTab[timeCounter]
                 timeCounter += 1
             else:
                 time = 'am'
