@@ -3,6 +3,7 @@ import sys
 import random
 import csv
 import json
+from pathlib import Path
 
 def prepare_data():
     """Prepare model data and retrun dictionary containing is.
@@ -118,6 +119,74 @@ def parse_arguments():
 
     return args
 
+def read(path, file_name):
+    path = path / file_name
+    if path.exists():
+        if (file_name[4:] == '.csv'):
+            data = csv_read(path)
+        else:
+            data = json_read(path)
+
+        if data['Model'] == 'A':
+            return int(data['Czas'])
+    return 0
+
+def write(path, file_name):
+    path.mkdir(parents= True, exist_ok= True)
+    if (file_name[4:] == '.csv'):
+        csv_write(path / file_name, prepare_data())
+    else:
+        json_write(path / file_name, prepare_data())
+
+def pathsConstructor(args):
+    # Returns a list containing tuples in format (month, day, time) to help reaching needed paths
+    days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+    timeCounter = 0
+    paths = []
+    for i in range(len(args.months)):
+        month = args.months[i]
+
+        d_range = []
+        if len(args.days[i]) == 3:
+            d_range.append(args.days[i])
+        else:
+            start = days.index(args.days[i][:3])
+            end = days.index(args.days[i][4:])
+            d_range = days[start:end + 1]
+
+        for day in d_range:
+            if timeCounter < len(args.time):
+                time = args.time[timeCounter]
+                timeCounter += 1
+            else:
+                time = 'am'
+            paths.append((month, day, time))
+
+    return paths
+
+def run(args):
+    paths = pathsConstructor(args)
+    data = 0
+
+    for p in paths:
+        path = Path(f'{p[0]}/{p[1]}/{p[2]}')
+        files = []
+        if args.csv:
+            files.append('Dane.csv')
+        if args.json:
+            files.append('Dane.json')
+
+        if args.read:
+            for file in files:
+                data += read(path, file)
+        else:
+            for file in files:
+                write(path, file)
+
+    if args.read:
+        print(f'Odczytany czas: {data}')
+
 if __name__ == "__main__":
     args = parse_arguments()
     print(args)
+    run(args)
