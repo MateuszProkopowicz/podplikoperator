@@ -1,5 +1,4 @@
 import argparse
-import sys
 import random
 import csv
 import json
@@ -26,8 +25,8 @@ def csv_write(file_name, data):
         data (dict): dictionary containing data in format {name : value}
     """
 
-    with open(file_name, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, ['Model', 'Wynik', 'Czas'], delimiter=';', lineterminator=';\r\n')
+    with open(file_name, 'w', newline='', encoding="UTF8") as csvfile:
+        writer = csv.DictWriter(csvfile, ['Model', 'Wynik', 'Czas'], delimiter=';', lineterminator='\r\n')
         writer.writeheader()
         writer.writerow(data)
 
@@ -43,16 +42,9 @@ def csv_read(file_name):
         dict: dictionary containing data from file
     """
 
-    with open(file_name, 'r', newline='') as csvfile:
+    with open(file_name, 'r', newline='', encoding="UTF8") as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';')
         data = next(reader)
-
-        # DictReader does not allow us to specify custom line delimiter. This
-        # leads to data containing an empty record being a result of semicolon
-        # ending lines in specified file formatting, which must be removed.
-        if '' in data.keys():
-            del data['']
-
         return data
 
 def json_write(file_name, data):
@@ -63,7 +55,7 @@ def json_write(file_name, data):
         data (dict): dictionary containing data in format {name : value}
     """
 
-    with open(file_name, 'w', newline='') as jsonfile:
+    with open(file_name, 'w', newline='', encoding="UTF8") as jsonfile:
         json.dump(data, jsonfile)
 
 def json_read(file_name):
@@ -77,7 +69,7 @@ def json_read(file_name):
         dict: dictionary containing data from file
     """
 
-    with open(file_name, 'r', newline='') as jsonfile:
+    with open(file_name, 'r', newline='', encoding="UTF8") as jsonfile:
         data = json.load(jsonfile)
         return data
 
@@ -109,7 +101,7 @@ def parse_arguments():
     file_type.add_argument('-c', '--csv', action='store_true')
     file_type.add_argument('-j', '--json', action='store_true')
 
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args()
 
     if not (args.csv or args.json):
         parser.error('no file type specified, add -c or -j')
@@ -193,5 +185,4 @@ def run(args):
 
 if __name__ == "__main__":
     args = parse_arguments()
-    print(args)
     run(args)
