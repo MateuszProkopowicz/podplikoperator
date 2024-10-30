@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 def prepare_data():
-    """Prepare model data and retrun dictionary containing is.
+    """Prepare model data and return dictionary containing it.
 
     Returns:
         dict[str, str | int]: resulting model data
@@ -25,8 +25,8 @@ def csv_write(file_name, data):
         data (dict): dictionary containing data in format {name : value}
     """
 
-    with open(file_name, 'w', newline='', encoding="UTF8") as csvfile:
-        writer = csv.DictWriter(csvfile, ['Model', 'Wynik', 'Czas'], delimiter=';', lineterminator='\r\n')
+    with open(file_name, 'w', newline='', encoding="UTF8") as csv_file:
+        writer = csv.DictWriter(csv_file, ['Model', 'Wynik', 'Czas'], delimiter=';', lineterminator='\r\n')
         writer.writeheader()
         writer.writerow(data)
 
@@ -42,8 +42,8 @@ def csv_read(file_name):
         dict: dictionary containing data from file
     """
 
-    with open(file_name, 'r', newline='', encoding="UTF8") as csvfile:
-        reader = csv.DictReader(csvfile, delimiter=';')
+    with open(file_name, 'r', newline='', encoding="UTF8") as csv_file:
+        reader = csv.DictReader(csv_file, delimiter=';')
         data = next(reader)
         return data
 
@@ -55,8 +55,8 @@ def json_write(file_name, data):
         data (dict): dictionary containing data in format {name : value}
     """
 
-    with open(file_name, 'w', newline='', encoding="UTF8") as jsonfile:
-        json.dump(data, jsonfile)
+    with open(file_name, 'w', newline='', encoding="UTF8") as json_file:
+        json.dump(data, json_file)
 
 def json_read(file_name):
     """Read data from json file to a dictionary.
@@ -69,8 +69,8 @@ def json_read(file_name):
         dict: dictionary containing data from file
     """
 
-    with open(file_name, 'r', newline='', encoding="UTF8") as jsonfile:
-        data = json.load(jsonfile)
+    with open(file_name, 'r', newline='', encoding="UTF8") as json_file:
+        data = json.load(json_file)
         return data
 
 def parse_arguments():
@@ -83,7 +83,7 @@ def parse_arguments():
                 'sat', 'sat-sun',
                 'sun',)
 
-    parser = argparse.ArgumentParser(description="This script creates and reads files containing example data in subfolders according to a hierarchy: /month/day/time/.")
+    parser = argparse.ArgumentParser(description="This script creates and reads files containing example data in sub-folders according to a hierarchy: /month/day/time/.")
 
     parser.add_argument('-m', '--months', choices=months, nargs="+", metavar='MONTH', required=True,
                         help='list of months, for which files should be accessed')
@@ -92,12 +92,12 @@ def parse_arguments():
     parser.add_argument('-t', '--time', choices=('am', 'pm'), nargs="*", metavar='TIME',
                         help='list of times of day (am/pm), for which files should be accessed. One for each month-day combination (`am` if not specified)')
 
-    operation = parser.add_argument_group('operation', 'select which operation you want to perform on files (these options are mutually exclusive)')
-    excluseive_operation = operation.add_mutually_exclusive_group(required=True)
-    excluseive_operation.add_argument('-r', '--read', action='store_true')
-    excluseive_operation.add_argument('-w', '--write', action='store_true')
+    operation = parser.add_argument_group('operation', 'Select which operation you want to perform on files (these options are mutually exclusive).')
+    exclusive_operation = operation.add_mutually_exclusive_group(required=True)
+    exclusive_operation.add_argument('-r', '--read', action='store_true')
+    exclusive_operation.add_argument('-w', '--write', action='store_true')
 
-    file_type = parser.add_argument_group('file type', 'specify file extensions for which operatins should be performed')
+    file_type = parser.add_argument_group('file type', 'Specify file extensions for which operations should be performed.')
     file_type.add_argument('-c', '--csv', action='store_true')
     file_type.add_argument('-j', '--json', action='store_true')
 
@@ -114,7 +114,7 @@ def parse_arguments():
 def read(path, file_name):
     path = path / file_name
     if path.exists():
-        if (file_name[4:] == '.csv'):
+        if file_name[4:] == '.csv':
             data = csv_read(path)
         else:
             data = json_read(path)
@@ -125,24 +125,22 @@ def read(path, file_name):
 
 def write(path, file_name):
     path.mkdir(parents= True, exist_ok= True)
-    if (file_name[4:] == '.csv'):
+    if file_name[4:] == '.csv':
         csv_write(path / file_name, prepare_data())
     else:
         json_write(path / file_name, prepare_data())
 
-def pathsConstructor(args):
+def paths_constructor(args):
     # Returns a list containing tuples in format (month, day, time) to help reaching needed paths
     days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-    timeCounter = 0
+    time_counter = 0
     if args.time is None:
-        timeTab = []
+        times = []
     else:
-        timeTab = args.time
+        times = args.time
     paths = []
 
-    for i in range(len(args.months)):
-        month = args.months[i]
-
+    for i, month in enumerate(args.months):
         d_range = []
         if len(args.days[i]) == 3:
             d_range.append(args.days[i])
@@ -152,9 +150,9 @@ def pathsConstructor(args):
             d_range = days[start:end + 1]
 
         for day in d_range:
-            if timeCounter < len(timeTab):
-                time = timeTab[timeCounter]
-                timeCounter += 1
+            if time_counter < len(times):
+                time = times[time_counter]
+                time_counter += 1
             else:
                 time = 'am'
             paths.append((month, day, time))
@@ -162,7 +160,7 @@ def pathsConstructor(args):
     return paths
 
 def run(args):
-    paths = pathsConstructor(args)
+    paths = paths_constructor(args)
     data = 0
 
     for p in paths:
